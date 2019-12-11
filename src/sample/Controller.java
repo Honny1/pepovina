@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -30,8 +31,6 @@ public class Controller implements Initializable {
     private Button selectImageFile;
     @FXML
     private Button applyMatrixFilter;
-    @FXML
-    private Button generateImage;
     @FXML
     private Button restoreOriginalImage;
     @FXML
@@ -47,8 +46,6 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         this.applyMatrixFilter.setDisable(true);
         this.restoreOriginalImage.setDisable(true);
-        this.originalImage.setDisable(true);
-        this.modifiedImage.setDisable(true);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -68,7 +65,6 @@ public class Controller implements Initializable {
     public void exit() {
         Stage stage = (Stage) window.getScene().getWindow();
         stage.close();
-
     }
 
     @FXML
@@ -101,13 +97,31 @@ public class Controller implements Initializable {
         FileChooser stegoImageSaver = new FileChooser();
         stegoImageSaver.setTitle("Save Image File");
         File file = stegoImageSaver.showSaveDialog(null);
-        System.out.println(file.getAbsolutePath());
-        BufferedImage bImage = SwingFXUtils.fromFXImage(imageView.getImage(), null);
+        BufferedImage bImage = SwingFXUtils.fromFXImage(this.imageView.getImage(), null);
         try {
-            ImageIO.write(bImage, ".jpg", file.getAbsoluteFile());
+            ImageIO.write(bImage, "png", file.getAbsoluteFile());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private BufferedImage creatImage() {
+        BufferedImage bImage = new BufferedImage((int) imageView.getFitWidth(), (int) imageView.getFitHeight(), BufferedImage.TYPE_3BYTE_BGR);
+        for (int x = 0; x < bImage.getWidth(); x++) {
+            for (int y = 0; y < bImage.getHeight(); y++) {
+                int r = Math.round((x + y) % 200);
+                int g = Math.round(y % 120);
+                int b = Math.round((x + y) % 150);
+                bImage.setRGB(x, y, new java.awt.Color(r, g, b).getRGB());
+            }
+        }
+        return bImage;
+    }
+
+    @FXML
+    void genImage() {
+        BufferedImage img = creatImage();
+        Image image = SwingFXUtils.toFXImage(img, null);
+        imageView.setImage(image);
+    }
 }

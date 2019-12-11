@@ -63,7 +63,7 @@
                 <Button fx:id="editMatrix" mnemonicParsing="false" prefHeight="25.0" prefWidth="180.0" text="Edit Matrix" GridPane.rowIndex="1" />
                 <Button fx:id="applyMatrixFilter" mnemonicParsing="false" prefHeight="25.0" prefWidth="180.0" text="Apply Matrix Filter" GridPane.rowIndex="3" />
                 <TextArea fx:id="textArea" maxWidth="180" prefHeight="180.0" prefWidth="180.0" GridPane.rowIndex="4" />
-                <Button fx:id="generateImage" mnemonicParsing="false" prefHeight="70.0" prefWidth="180.0" text="Generate Image" GridPane.rowIndex="5" />
+                <Button fx:id="generateImage" mnemonicParsing="false" onAction="#genImage" prefHeight="70.0" prefWidth="180.0" text="Generate Image" GridPane.rowIndex="5" />
                 <Button fx:id="restoreOriginalImage" mnemonicParsing="false" prefHeight="70.0" prefWidth="180.0" text="Restore Original Image" GridPane.rowIndex="6" />
                 <Canvas fx:id="canvas" height="85" width="85" GridPane.rowIndex="2" />
                 <RadioButton fx:id="originalImage" mnemonicParsing="false" selected="true" text="Original Image" GridPane.rowIndex="7" />
