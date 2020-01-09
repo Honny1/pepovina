@@ -34,13 +34,19 @@ public class Controller implements Initializable {
     @FXML
     private Button restoreOriginalImage;
     @FXML
-    private RadioButton originalImage;
-    @FXML
-    private RadioButton modifiedImage;
-    @FXML
     private ImageView imageView;
 
     private Stage window = Main.getPrimaryStage();
+
+    @FXML
+    private RadioButton originalImageRadio;
+
+    @FXML
+    private RadioButton modifiedImageRadio;
+
+    private Image newImage = null;
+    private Image originalImage = null;
+
 
     @FXML
     public void initialize(URL url, ResourceBundle rb) {
@@ -49,6 +55,20 @@ public class Controller implements Initializable {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+    }
+
+    @FXML
+    void use_modified() {
+        imageView.setImage(newImage);
+        originalImageRadio.setSelected(false);
+        modifiedImageRadio.setSelected(true);
+    }
+
+    @FXML
+    void use_original() {
+        imageView.setImage(originalImage);
+        originalImageRadio.setSelected(true);
+        modifiedImageRadio.setSelected(false);
     }
 
     @FXML
@@ -79,8 +99,9 @@ public class Controller implements Initializable {
             try {
                 BufferedImage bufferedImage = ImageIO.read(file);
                 Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                imageView.setImage(image);
                 imageView.fitHeightProperty().bind(window.heightProperty());
+                originalImage = image;
+                use_original();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -121,7 +142,33 @@ public class Controller implements Initializable {
     @FXML
     void genImage() {
         BufferedImage img = creatImage();
-        Image image = SwingFXUtils.toFXImage(img, null);
-        imageView.setImage(image);
+        originalImage = SwingFXUtils.toFXImage(img, null);
+        use_original();
+    }
+
+    @FXML
+    public void negateImage() {
+        BufferedImage used_image = SwingFXUtils.fromFXImage(originalImage, null);
+        if (newImage != null) {
+            used_image = SwingFXUtils.fromFXImage(newImage, null);
+        }
+        BufferedImage new_Image = new BufferedImage(
+                used_image.getWidth(),
+                used_image.getHeight(),
+                used_image.getType()
+        );
+        for (int x = 0; x < used_image.getWidth(); x++) {
+            for (int y = 0; y < used_image.getHeight(); y++) {
+                int originalPixel = used_image.getRGB(x, y);
+                java.awt.Color originalColor = new java.awt.Color(originalPixel);
+                new_Image.setRGB(x, y, new java.awt.Color(
+                        Math.abs(255 - originalColor.getRed()),
+                        Math.abs(255 - originalColor.getGreen()),
+                        Math.abs(255 - originalColor.getBlue()))
+                        .getRGB());
+            }
+        }
+        newImage = SwingFXUtils.toFXImage(new_Image, null);
+        use_modified();
     }
 }

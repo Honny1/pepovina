@@ -26,7 +26,7 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Filters">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete" />
+                        <MenuItem mnemonicParsing="false" onAction="#negateImage" text="Negate Image" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="About">
@@ -66,8 +66,8 @@
                 <Button fx:id="generateImage" mnemonicParsing="false" onAction="#genImage" prefHeight="70.0" prefWidth="180.0" text="Generate Image" GridPane.rowIndex="5" />
                 <Button fx:id="restoreOriginalImage" mnemonicParsing="false" prefHeight="70.0" prefWidth="180.0" text="Restore Original Image" GridPane.rowIndex="6" />
                 <Canvas fx:id="canvas" height="85" width="85" GridPane.rowIndex="2" />
-                <RadioButton fx:id="originalImage" mnemonicParsing="false" selected="true" text="Original Image" GridPane.rowIndex="7" />
-                <RadioButton fx:id="modifiedImage" mnemonicParsing="false" text="Modified Image" GridPane.rowIndex="8" />
+                <RadioButton fx:id="originalImageRadio" onAction="#use_original" mnemonicParsing="false" selected="true" text="Original Image" GridPane.rowIndex="7" />
+                <RadioButton fx:id="modifiedImageRadio" onAction="#use_modified" mnemonicParsing="false" text="Modified Image" GridPane.rowIndex="8" />
             </children>
         </GridPane>
     </right>
