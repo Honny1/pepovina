@@ -1,21 +1,36 @@
 package sample;
 
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import javax.imageio.ImageIO;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
@@ -171,4 +186,159 @@ public class Controller implements Initializable {
         newImage = SwingFXUtils.toFXImage(new_Image, null);
         use_modified();
     }
+
+    public void autoThreshold() {
+        BufferedImage used_image = SwingFXUtils.fromFXImage(originalImage, null);
+        if (newImage != null) {
+            used_image = SwingFXUtils.fromFXImage(newImage, null);
+        }
+        BufferedImage new_Image = new BufferedImage(
+                used_image.getWidth(),
+                used_image.getHeight(),
+                used_image.getType()
+        );
+        //compute treshold
+        long currentTreshold = 0;
+        for (int x = 0; x < used_image.getWidth(); x++) {
+            for (int y = 0; y < used_image.getHeight(); y++) {
+                java.awt.Color c = new java.awt.Color(used_image.getRGB(x, y));
+                currentTreshold = currentTreshold + c.getRed() + c.getGreen() + c.getBlue();
+            }
+        }
+        currentTreshold = (currentTreshold / (used_image.getHeight() * used_image.getWidth() * 3));
+
+        int black = java.awt.Color.BLACK.getRGB();
+        int white = java.awt.Color.WHITE.getRGB();
+        for (int x = 0; x < used_image.getWidth(); x++) {
+            for (int y = 0; y < used_image.getHeight(); y++) {
+                int rgb = used_image.getRGB(x, y);
+                java.awt.Color c = new java.awt.Color(rgb);
+                if (c.getRed() > currentTreshold ||
+                        c.getGreen() > currentTreshold ||
+                        c.getBlue() > currentTreshold) {
+                    new_Image.setRGB(x, y, white);
+                } else {
+                    new_Image.setRGB(x, y, black);
+                }
+            }
+        }
+        newImage = SwingFXUtils.toFXImage(new_Image, null);
+        use_modified();
+    }
+
+    public Image threshold(int currentTreshold) {
+        BufferedImage used_image = SwingFXUtils.fromFXImage(originalImage, null);
+        if (newImage != null) {
+            used_image = SwingFXUtils.fromFXImage(newImage, null);
+        }
+        BufferedImage new_Image = new BufferedImage(
+                used_image.getWidth(),
+                used_image.getHeight(),
+                used_image.getType()
+        );
+
+        int black = java.awt.Color.BLACK.getRGB();
+        int white = java.awt.Color.WHITE.getRGB();
+        for (int x = 0; x < used_image.getWidth(); x++) {
+            for (int y = 0; y < used_image.getHeight(); y++) {
+                int rgb = used_image.getRGB(x, y);
+                java.awt.Color c = new java.awt.Color(rgb);
+                if (c.getRed() > currentTreshold ||
+                        c.getGreen() > currentTreshold ||
+                        c.getBlue() > currentTreshold) {
+                    new_Image.setRGB(x, y, white);
+                } else {
+                    new_Image.setRGB(x, y, black);
+                }
+            }
+        }
+        return SwingFXUtils.toFXImage(new_Image, null);
+    }
+
+    public void thresholdDialog(ActionEvent event) {
+        final Stage dialog = new Stage();
+        dialog.setTitle("Threshold");
+        dialog.initModality(Modality.NONE);
+
+        Button apply = new Button("Apply");
+        Button cancle = new Button("Cancle");
+        BufferedImage used_image = SwingFXUtils.fromFXImage(originalImage, null);
+        ImageView dialogImageView = new ImageView(
+                SwingFXUtils.toFXImage(
+                        scale(used_image,
+                                (int) originalImage.getWidth() / 2,
+                                (int) originalImage.getHeight() / 2),
+                        null));
+
+
+        Slider slider = new Slider(0, 255, 255);
+        slider.setOnMouseDragged(e -> {
+            BufferedImage dialogImage = SwingFXUtils.fromFXImage(
+                    threshold((int) slider.getValue()), null);
+            dialogImage = scale(dialogImage,
+                    (int) originalImage.getWidth() / 2,
+                    (int) originalImage.getHeight() / 2);
+            dialogImageView.setImage(
+                    SwingFXUtils.toFXImage(dialogImage, null));
+        });
+
+        BufferedImage dialogImage = SwingFXUtils.fromFXImage(
+                threshold((int) slider.getValue()), null);
+        dialogImage = scale(dialogImage,
+                (int) originalImage.getWidth() / 2,
+                (int) originalImage.getHeight() / 2);
+        dialogImageView.setImage(
+                SwingFXUtils.toFXImage(dialogImage, null));
+
+        apply.setOnAction(e -> {
+            newImage = threshold((int) slider.getValue());
+            use_modified();
+            dialog.close();
+        });
+
+        cancle.setOnAction(e -> {
+            dialog.close();
+        });
+
+        GridPane gridPaneRow = new GridPane();
+        gridPaneRow.setHgap(10);
+        gridPaneRow.setVgap(10);
+        gridPaneRow.add(apply, 0, 0);
+        gridPaneRow.add(cancle, 1, 0);
+        gridPaneRow.setAlignment(Pos.CENTER);
+
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.add(dialogImageView, 0, 0);
+        gridPane.add(slider, 0, 1);
+        gridPane.add(gridPaneRow, 0, 2);
+        gridPane.setAlignment(Pos.CENTER);
+
+        Scene dialogScene = new Scene(gridPane,
+                originalImage.getWidth() / 2 + 100,
+                originalImage.getHeight() / 2 + 100);
+        dialog.setScene(dialogScene);
+        dialog.show();
+
+    }
+
+    public static BufferedImage scale(BufferedImage src, int w, int h) {
+        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        int x, y;
+        int ww = src.getWidth();
+        int hh = src.getHeight();
+        int[] ys = new int[h];
+        for (y = 0; y < h; y++)
+            ys[y] = y * hh / h;
+        for (x = 0; x < w; x++) {
+            int newX = x * ww / w;
+            for (y = 0; y < h; y++) {
+                int col = src.getRGB(newX, ys[y]);
+                img.setRGB(x, y, col);
+            }
+        }
+        return img;
+    }
+
 }

@@ -27,6 +27,8 @@
                 <Menu mnemonicParsing="false" text="Filters">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#negateImage" text="Negate Image" />
+                        <MenuItem mnemonicParsing="false" onAction="#thresholdDialog" text="Trashold Image" />
+                        <MenuItem mnemonicParsing="false" onAction="#autoThreshold" text="Auto Trashold Image" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="About">
